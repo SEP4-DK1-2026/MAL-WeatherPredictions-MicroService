@@ -12,7 +12,7 @@ import {
   createDatabaseConnection,
   database,
 } from "../database.js";
-import { passwordConfig } from "../config.js";
+import { passwordConfig, API_DOMAIN, API_KEY } from "../config.js";
 import { range } from "../utils.js";
 
 export interface PredictionInput {
@@ -20,7 +20,6 @@ export interface PredictionInput {
   prediction_offset: number;
 }
 
-const API_URL = "";
 const HOUR_OFFSETS = [
   ...range(24 * 0 + 1, 24 * 1 + 1, 1), // First day every hour
   ...range(24 * 1 + 2, 24 * 2 + 1, 2), // Second day every other hour
@@ -32,18 +31,35 @@ const HOUR_OFFSETS = [
 async function makePrediction(
   input: PredictionInput,
 ): Promise<WeatherPrediction> {
-  return fetch(API_URL)
+  return fetch(`${API_DOMAIN}/v1/predictions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": API_KEY,
+    },
+    body: JSON.stringify({
+      modelInput: input.weather,
+      predictionOffset: input.prediction_offset,
+    }),
+  })
+    .then(async (res) => {
+      if (!res.ok) throw Error(await res.text());
+      return res;
+    })
     .then((res) => res.json())
-    .catch((e) => ({
-      predicted_time: input.weather.time + input.prediction_offset, // WARNING: Dummy results
-      prediction_offset: input.prediction_offset,
-      temperature: input.weather.temperature - 1,
-      humidity: input.weather.humidity,
-      wind_direction: input.weather.wind_direction,
-      wind_speed: input.weather.wind_speed,
-      precipitation: input.weather.precipitation,
-      light: input.weather.light + 2,
-    }));
+    .catch((e) => {
+      console.log("DUMMY API RESPONSE: " + e);
+      return {
+        predicted_time: input.weather.time + input.prediction_offset, // WARNING: Dummy results
+        prediction_offset: input.prediction_offset,
+        temperature: input.weather.temperature - 1,
+        humidity: input.weather.humidity,
+        wind_direction: input.weather.wind_direction,
+        wind_speed: input.weather.wind_speed,
+        precipitation: input.weather.precipitation,
+        light: input.weather.light + 2,
+      };
+    });
 }
 
 async function makePredictions(

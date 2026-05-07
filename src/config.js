@@ -18,3 +18,6 @@ export const passwordConfig = {
   port,
   ssl: true,
 };
+
+export const API_DOMAIN = process.env.API_DOMAIN;
+export const API_KEY = process.env.API_KEY;
