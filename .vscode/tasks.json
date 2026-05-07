@@ -7,7 +7,7 @@
       "command": "host start",
       "problemMatcher": "$func-node-watch",
       "isBackground": true,
-      "dependsOn": "npm watch (functions)"
+      "dependsOn": ["npm build (functions)", "npm watch (functions)"]
     },
     {
       "type": "shell",
