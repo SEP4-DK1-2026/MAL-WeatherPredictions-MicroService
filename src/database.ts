@@ -1,4 +1,3 @@
-// https://learn.microsoft.com/en-us/azure/azure-sql/database/azure-sql-javascript-mssql-quickstart?view=azuresql&tabs=passwordless%2Cservice-connector%2Cportal#configure-the-mssql-connection-object
 import { Client, Result } from "pg";
 
 import { WeatherPrediction, Weather } from "./schema";
