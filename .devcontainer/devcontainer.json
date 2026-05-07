@@ -10,7 +10,6 @@
       "extensions": [
         "ms-azuretools.vscode-azurecontainerapps",
         "ms-azuretools.vscode-azurefunctions",
-        "ms-azuretools.vscode-azureresourcegroups",
         "esbenp.prettier-vscode"
       ]
     }
