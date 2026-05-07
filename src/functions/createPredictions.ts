@@ -6,19 +6,11 @@ import {
   HttpResponseInit,
 } from "@azure/functions";
 
-import {
-  Weather,
-  WeatherPrediction,
-  createDatabaseConnection,
-  database,
-} from "../database.js";
+import { createDatabaseConnection, database } from "../database.js";
 import { passwordConfig, API_DOMAIN, API_KEY } from "../config.js";
 import { range } from "../utils.js";
 
-export interface PredictionInput {
-  weather: Weather;
-  prediction_offset: number;
-}
+import { Weather, WeatherPrediction, PredictionInput } from "../schema.js";
 
 const HOUR_OFFSETS = [
   ...range(24 * 0 + 1, 24 * 1 + 1, 1), // First day every hour

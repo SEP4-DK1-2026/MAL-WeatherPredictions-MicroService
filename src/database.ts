@@ -1,28 +1,7 @@
 // https://learn.microsoft.com/en-us/azure/azure-sql/database/azure-sql-javascript-mssql-quickstart?view=azuresql&tabs=passwordless%2Cservice-connector%2Cportal#configure-the-mssql-connection-object
-import { log } from "console";
-import pg from "pg";
 import { Client, Result } from "pg";
 
-export interface Weather {
-  time: number;
-  temperature: number;
-  humidity: number;
-  wind_direction: number;
-  wind_speed: number;
-  precipitation: number;
-  light: number;
-}
-
-export interface WeatherPrediction extends Weather {
-  predicted_time: number;
-  prediction_offset: number;
-  temperature: number;
-  humidity: number;
-  wind_direction: number;
-  wind_speed: number;
-  precipitation: number;
-  light: number;
-}
+import { WeatherPrediction, Weather } from "./schema";
 
 export let database = null;
 
