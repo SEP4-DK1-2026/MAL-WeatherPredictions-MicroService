@@ -10,7 +10,7 @@ import { createDatabaseConnection, database } from "../database.js";
 import { passwordConfig, API_DOMAIN, API_KEY } from "../config.js";
 import { range } from "../utils.js";
 
-import { Weather, WeatherPrediction, PredictionInput } from "../schema.js";
+import { Weather, WeatherPrediction } from "../schema.js";
 
 const HOUR_OFFSETS = [
   ...range(24 * 0 + 1, 24 * 1 + 1, 1), // First day every hour
@@ -20,18 +20,19 @@ const HOUR_OFFSETS = [
   ...range(24 * 6 + 12, 24 * 7 + 1, 12), // Seventh day every 12 hours
 ];
 
-async function makePrediction(
-  input: PredictionInput,
-): Promise<WeatherPrediction> {
+async function makePredictions(
+  weather: Weather,
+  offsets: number[],
+): Promise<WeatherPrediction[]> {
   return fetch(`${API_DOMAIN}/v1/predictions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-api-key": API_KEY,
+      "x-functions-key": API_KEY,
     },
     body: JSON.stringify({
-      modelInput: input.weather,
-      predictionOffset: input.prediction_offset,
+      model_input: weather,
+      prediction_offsets: offsets,
     }),
   })
     .then(async (res) => {
@@ -39,30 +40,22 @@ async function makePrediction(
       return res;
     })
     .then((res) => res.json())
+    .then((res) => res.predictions)
     .catch((e) => {
       console.log("DUMMY API RESPONSE: " + e);
-      return {
-        predicted_time: input.weather.time + input.prediction_offset, // WARNING: Dummy results
-        prediction_offset: input.prediction_offset,
-        temperature: input.weather.temperature - 1,
-        humidity: input.weather.humidity,
-        wind_direction: input.weather.wind_direction,
-        wind_speed: input.weather.wind_speed,
-        precipitation: input.weather.precipitation,
-        light: input.weather.light + 2,
-      };
+      return [
+        {
+          predicted_time: weather.time + offsets[0], // WARNING: Dummy results
+          prediction_offset: offsets[0],
+          temperature: weather.temperature - 1,
+          humidity: weather.humidity,
+          wind_direction: weather.wind_direction,
+          wind_speed: weather.wind_speed,
+          precipitation: weather.precipitation,
+          light: weather.light + 2,
+        },
+      ];
     });
-}
-
-async function makePredictions(
-  weather: Weather,
-  offsets: number[],
-): Promise<WeatherPrediction[]> {
-  return Promise.all(
-    offsets.map((offset) =>
-      makePrediction({ weather, prediction_offset: offset }),
-    ),
-  );
 }
 
 async function savePrediction(prediction: WeatherPrediction): Promise<void> {

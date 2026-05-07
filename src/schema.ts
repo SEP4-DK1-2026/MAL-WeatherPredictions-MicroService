@@ -18,8 +18,3 @@ export interface WeatherPrediction extends Weather {
   precipitation: number;
   light: number;
 }
-
-export interface PredictionInput {
-  weather: Weather;
-  prediction_offset: number;
-}
