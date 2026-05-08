@@ -46,10 +46,10 @@ export default class Database {
         prediction.prediction_offset,
         prediction.temperature,
         prediction.humidity,
-        prediction.wind_direction,
+        Math.floor(prediction.wind_direction),
         prediction.wind_speed,
         prediction.precipitation,
-        prediction.light,
+        Math.floor(prediction.light),
       ],
     );
 
