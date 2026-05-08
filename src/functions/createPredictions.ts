@@ -58,14 +58,14 @@ async function makePredictions(
     });
 }
 
-async function savePrediction(prediction: WeatherPrediction): Promise<void> {
-  database.createPrediction(prediction);
-}
-
 async function savePredictions(
   predictions: WeatherPrediction[],
 ): Promise<void> {
-  await Promise.all(predictions.map(savePrediction));
+  try {
+    await database.savePredictions(predictions);
+  } catch (e) {
+    console.log(`Error creating prediction in database: ${e}`);
+  }
 }
 
 async function getCurrentWeather(): Promise<Weather> {

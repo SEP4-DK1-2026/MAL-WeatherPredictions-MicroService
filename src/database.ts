@@ -1,4 +1,5 @@
 import { Client, Result } from "pg";
+import format from "pg-format";
 
 import { WeatherPrediction, Weather } from "./schema";
 
@@ -38,22 +39,25 @@ export default class Database {
     }
   }
 
-  async createPrediction(prediction: WeatherPrediction) {
-    const result = await this.client.query(
-      `INSERT INTO "WeatherPrediction" (predicted_time, prediction_offset, temperature, humidity, wind_direction, wind_speed, precipitation, light) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [
-        prediction.predicted_time,
-        prediction.prediction_offset,
-        prediction.temperature,
-        prediction.humidity,
-        Math.floor(prediction.wind_direction),
-        prediction.wind_speed,
-        prediction.precipitation,
-        Math.floor(prediction.light),
-      ],
-    );
+  async savePredictions(predictions: WeatherPrediction[]) {
+    const values: Array<Array<number>> = predictions.map((p) => [
+      p.predicted_time,
+      p.prediction_offset,
+      p.temperature,
+      p.humidity,
+      Math.floor(p.wind_direction),
+      p.wind_speed,
+      p.precipitation,
+      Math.floor(p.light),
+    ]);
 
-    return result.rows[0];
+    const result = await this.client.query(
+      format(
+        'INSERT INTO "WeatherPrediction" (predicted_time, prediction_offset, temperature, humidity, wind_direction, wind_speed, precipitation, light) VALUES %L',
+        values,
+      ),
+    );
+    return result.rows;
   }
 
   async readLatestWeather(): Promise<Weather> {
