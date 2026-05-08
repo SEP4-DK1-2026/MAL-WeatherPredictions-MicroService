@@ -115,6 +115,6 @@ app.timer("createPredictions", {
 
 app.http("createPredictionsRequest", {
   methods: ["POST"],
-  authLevel: "anonymous",
+  authLevel: "function",
   handler: createPredictionsRequest,
 });
