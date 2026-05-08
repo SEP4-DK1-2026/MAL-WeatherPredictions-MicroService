@@ -42,19 +42,8 @@ async function makePredictions(
     .then((res) => res.json())
     .then((res) => res.predictions)
     .catch((e) => {
-      console.log("DUMMY API RESPONSE: " + e);
-      return [
-        {
-          predicted_time: weather.time + offsets[0], // WARNING: Dummy results
-          prediction_offset: offsets[0],
-          temperature: weather.temperature - 1,
-          humidity: weather.humidity,
-          wind_direction: weather.wind_direction,
-          wind_speed: weather.wind_speed,
-          precipitation: weather.precipitation,
-          light: weather.light + 2,
-        },
-      ];
+      console.log(`Error when making predictions: ${e}`);
+      return [];
     });
 }
 
@@ -64,7 +53,7 @@ async function savePredictions(
   try {
     await database.savePredictions(predictions);
   } catch (e) {
-    console.log(`Error creating prediction in database: ${e}`);
+    console.log(`Error creating predictions in database: ${e}`);
   }
 }
 
@@ -85,10 +74,19 @@ async function createPredictions() {
   await createDatabaseConnection(passwordConfig);
 
   const weather: Weather = await getCurrentWeather();
+  if (weather == null) {
+    console.log("No current weather");
+    return;
+  }
+
   const predictions: WeatherPrediction[] = await makePredictions(
     weather,
     HOUR_OFFSETS,
   );
+  if (predictions.length == 0) {
+    console.log("No predictions made");
+    return;
+  }
 
   await savePredictions(predictions);
 }

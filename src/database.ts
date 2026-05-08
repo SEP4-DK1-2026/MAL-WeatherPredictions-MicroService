@@ -65,19 +65,7 @@ export default class Database {
       'SELECT * FROM "Weather" WHERE time = (SELECT MAX(time) from "Weather")',
     );
 
-    if (result.rowCount == 0) {
-      console.log("DUMMY DB RESPONSE");
-      // WARNING: Dummy result
-      return {
-        time: Math.floor(Date.now() / 1000),
-        temperature: 10,
-        humidity: 90,
-        wind_direction: 0,
-        wind_speed: 3,
-        precipitation: 0,
-        light: 50,
-      };
-    }
+    if (result.rowCount == 0) return null;
     return result.rows[0];
   }
 }
