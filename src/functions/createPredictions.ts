@@ -6,11 +6,12 @@ import {
   HttpResponseInit,
 } from "@azure/functions";
 
-import { createDatabaseConnection, database } from "../database.js";
-import { passwordConfig, API_DOMAIN, API_KEY } from "../config.js";
+import { makePredictions } from "../services/predictions_service.js";
+import { createDatabaseConnection, database } from "../services/database.js";
+import { passwordConfig } from "../config.js";
 import { range } from "../utils.js";
 
-import { Weather, WeatherPrediction } from "../schema.js";
+import { Weather } from "../schema.js";
 
 const HOUR_OFFSETS = [
   ...range(24 * 0 + 1, 24 * 1 + 1, 1), // First day every hour
@@ -20,75 +21,42 @@ const HOUR_OFFSETS = [
   ...range(24 * 6 + 12, 24 * 7 + 1, 12), // Seventh day every 12 hours
 ];
 
-async function makePredictions(
-  weather: Weather,
-  offsets: number[],
-): Promise<WeatherPrediction[]> {
-  return fetch(`${API_DOMAIN}/v1/predictions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-functions-key": API_KEY,
-    },
-    body: JSON.stringify({
-      model_input: weather,
-      prediction_offsets: offsets,
-    }),
-  })
-    .then(async (res) => {
-      if (!res.ok) throw Error(await res.text());
-      return res;
-    })
-    .then((res) => res.json())
-    .then((res) => res.predictions)
-    .catch((e) => {
-      console.log(`Error when making predictions: ${e}`);
-      return [];
-    });
-}
-
-async function savePredictions(
-  predictions: WeatherPrediction[],
-): Promise<void> {
+async function createPredictions(): Promise<boolean> {
   try {
-    await database.savePredictions(predictions);
+    await createDatabaseConnection(passwordConfig);
+
+    const weather: Weather = await database.readLatestWeather();
+    const model_names: string[] = await database.readModelNames();
+
+    const promised_responses: Promise<Record<any, any>>[] = model_names.map(
+      (model, index) =>
+        makePredictions({
+          model_input: weather,
+          prediction_offsets: HOUR_OFFSETS,
+          model: model,
+        }).then((res) => ({
+          index: index,
+          response: res,
+        })),
+    );
+
+    // pg only allows one query at once, so we wait for each to finish
+    while (promised_responses.length > 0) {
+      const { index, response } = await Promise.race(promised_responses);
+
+      const new_index: number = promised_responses.indexOf(
+        promised_responses[index],
+      );
+      promised_responses.splice(new_index, 1);
+
+      await database.savePredictions(response);
+    }
+
+    return true;
   } catch (e) {
-    console.log(`Error creating predictions in database: ${e}`);
+    console.log(`[Error] ${e}`);
+    return false;
   }
-}
-
-async function getCurrentWeather(): Promise<Weather> {
-  const weather: Record<string, any> = await database.readLatestWeather();
-  return {
-    time: weather.time,
-    temperature: weather.temperature,
-    humidity: weather.humidity,
-    wind_direction: weather.wind_direction,
-    wind_speed: weather.wind_speed,
-    precipitation: weather.precipitation,
-    light: weather.light,
-  };
-}
-
-async function createPredictions() {
-  await createDatabaseConnection(passwordConfig);
-
-  const weather: Weather = await getCurrentWeather();
-  if (weather == null) {
-    console.log("No current weather");
-    return;
-  }
-
-  const predictions: WeatherPrediction[] = await makePredictions(
-    weather,
-    HOUR_OFFSETS,
-  );
-  if (predictions.length == 0) {
-    console.log("No predictions made");
-    return;
-  }
-
-  await savePredictions(predictions);
 }
 
 export async function createPredictionsTimer(
@@ -102,9 +70,9 @@ export async function createPredictionsRequest(
   request: HttpRequest,
   context: InvocationContext,
 ): Promise<HttpResponseInit> {
-  await createPredictions();
+  const success: boolean = await createPredictions();
   return {
-    status: 200,
+    status: success ? 200 : 500,
   };
 }
 
