@@ -19,6 +19,6 @@ export async function makePredictions(
     })
     .then((res) => res.json())
     .catch((e) => {
-      throw Error(`Error when making predictions: ${e}`);
+      throw new Error(`Error when making predictions: ${e}`);
     });
 }

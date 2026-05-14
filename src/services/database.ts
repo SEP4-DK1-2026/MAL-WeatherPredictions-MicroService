@@ -21,9 +21,9 @@ export default class Database {
       this.connected = true;
       console.log("Database connected successfully.");
       return this.client;
-    } catch (error) {
-      console.error("Error connecting to the database:", error);
+    } catch (e) {
       this.connected = false;
+      throw new Error(`Error connecting to the database: ${e}`);
     }
   }
 
@@ -34,8 +34,8 @@ export default class Database {
         this.connected = false;
         console.log("Database disconnected successfully.");
       }
-    } catch (error) {
-      console.error("Error disconnecting from the database:", error);
+    } catch (e) {
+      console.error("Error disconnecting from the database:", e);
     }
   }
 
@@ -66,7 +66,7 @@ export default class Database {
       );
       return result.rows;
     } catch (e) {
-      throw Error(`Could not save predictions to database: ${e}`);
+      throw new Error(`Could not save predictions to database: ${e}`);
     }
   }
 
@@ -79,7 +79,7 @@ export default class Database {
       if (result.rowCount == 0) throw Error("No weather in database");
       return result.rows[0];
     } catch (e) {
-      throw Error(`Could not read latest weather from database: ${e}`);
+      throw new Error(`Could not read latest weather from database: ${e}`);
     }
   }
 
@@ -91,7 +91,7 @@ export default class Database {
 
       return result.rows.map((row) => row.name);
     } catch (e) {
-      throw Error(`Could not read model names from database: ${e}`);
+      throw new Error(`Could not read model names from database: ${e}`);
     }
   }
 }
