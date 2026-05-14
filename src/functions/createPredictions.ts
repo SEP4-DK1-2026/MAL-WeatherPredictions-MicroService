@@ -6,12 +6,12 @@ import {
   HttpResponseInit,
 } from "@azure/functions";
 
-import { makePredictions } from "../services/predictions_service.js";
-import { createDatabaseConnection, database } from "../services/database.js";
-import { passwordConfig } from "../config.js";
-import { range } from "../utils.js";
+import { makePredictions } from "../services/predictions_service";
+import { createDatabaseConnection, database } from "../services/database";
+import { passwordConfig } from "../config";
+import { range } from "../utils";
 
-import { Weather } from "../schema.js";
+import { Weather } from "../schema";
 
 const HOUR_OFFSETS = [
   ...range(24 * 0 + 1, 24 * 1 + 1, 1), // First day every hour
@@ -21,7 +21,7 @@ const HOUR_OFFSETS = [
   ...range(24 * 6 + 12, 24 * 7 + 1, 12), // Seventh day every 12 hours
 ];
 
-async function createPredictions(): Promise<boolean> {
+export async function createPredictions(): Promise<boolean> {
   try {
     await createDatabaseConnection(passwordConfig);
 
