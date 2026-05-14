@@ -51,7 +51,7 @@ export default class Database {
       Math.floor(p.wind_direction),
       p.wind_speed,
       p.precipitation,
-      Math.floor(p.light),
+      p.light,
       model_name,
       model_major_version,
       model_minor_version,
