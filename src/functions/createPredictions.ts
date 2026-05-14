@@ -56,6 +56,8 @@ export async function createPredictions(): Promise<boolean> {
   } catch (e) {
     console.log(`[Error] ${e}`);
     return false;
+  } finally {
+    await database.disconnect();
   }
 }
 

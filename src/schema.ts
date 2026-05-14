@@ -8,7 +8,7 @@ export interface Weather {
   light: number;
 }
 
-export interface WeatherPrediction extends Weather {
+export interface WeatherPrediction {
   predicted_time: number;
   prediction_offset: number;
   temperature: number;
