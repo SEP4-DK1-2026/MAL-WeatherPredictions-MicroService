@@ -1,6 +1,6 @@
-import { PredictionRequest, PredictionResponse } from "../schema";
+import { PredictionRequest, PredictionResponse } from "../schema.js";
 
-import { API_DOMAIN, API_KEY } from "../config";
+import { API_DOMAIN, API_KEY } from "../config.js";
 
 export async function makePredictions(
   req: PredictionRequest,
