@@ -6,12 +6,12 @@ import {
   HttpResponseInit,
 } from "@azure/functions";
 
-import { makePredictions } from "../services/predictions_service";
-import { createDatabaseConnection, database } from "../services/database";
-import { passwordConfig } from "../config";
-import { range } from "../utils";
+import { makePredictions } from "../services/predictions_service.js";
+import { createDatabaseConnection, database } from "../services/database.js";
+import { passwordConfig } from "../config.js";
+import { range } from "../utils.js";
 
-import { Weather } from "../schema";
+import { Weather } from "../schema.js";
 
 const HOUR_OFFSETS = [
   ...range(24 * 0 + 1, 24 * 1 + 1, 1), // First day every hour

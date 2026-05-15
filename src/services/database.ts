@@ -1,7 +1,7 @@
 import { Client, Result } from "pg";
 import format from "pg-format";
 
-import { Weather, PredictionResponse } from "../schema";
+import { Weather, PredictionResponse } from "../schema.js";
 
 export let database = null;
 
